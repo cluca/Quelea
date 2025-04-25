@@ -3,44 +3,76 @@ name: Build CI release
 on:
   push:
     branches:
-      - 'master'
+      - master
+    # paths:
+    #   - 'Quelea/**'
+
+  pull_request:
+    branches:
+      - master
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - name: Setup Java
-        run: |
-          curl -O https://cdn.azul.com/zulu/bin/zulu21.32.17-ca-fx-jdk21.0.2-linux_amd64.deb
-          sudo apt-get -y install ./zulu21.32.17-ca-fx-jdk21.0.2-linux_amd64.deb
-      - name: Environment setup
-        env:
-          DISPLAY: :99
-        run: |
-          sudo apt install -y wine xvfb
-          sudo dpkg --add-architecture i386
-          sudo apt-get update
-          sudo apt-get install wine32
-          wget http://files.jrsoftware.org/is/6/innosetup-6.2.2.exe -O is.exe
-          Xvfb $DISPLAY &
-          wine wineboot --init
-          wine is.exe /VERYSILENT /SUPPRESSMSGBOXES
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          java-package: 'jdk+fx'
+          distribution: 'zulu'
+      
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+      
+      - name: Setup Wine
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt update
+          sudo apt install wine wine32 wine64
+
+      - name: Setup Inno Setup cache
+        id: cache-innosetup
+        uses: actions/cache@v4
+        with:
+          path: ~/.wine/drive_c/Program Files (x86)/Inno Setup 6
+          key: ${{ runner.os }}-innosetup
+
+      - name: Install InnoSetup
+        if: ${{ ! steps.cache-innosetup.outputs.cache-hit }} # || true on Inno Setup update
+        env:
+          DISPLAY: :99
+          WINEDEBUG: -all,err+all
+          WINEARCH: win64
+        run: |
+          Xvfb $DISPLAY &
+          curl -SL "https://files.jrsoftware.org/is/6/innosetup-6.2.2.exe" -o is.exe
+          wine is.exe /SP- /VERYSILENT /ALLUSERS /SUPPRESSMSGBOXES
+
       - name: Build
         run: |
-          export JAVA_HOME=/usr/lib/jvm/zulu-fx-21-amd64/
           cd Quelea
-          chmod +x gradlew
-          chmod +x build-install.sh
-          ./gradlew -Dnightly=true -Dversionsuffix=CI-UNSTABLE clean dist
+          gradle -Dnightly=true -Dversionsuffix=CI-UNSTABLE clean dist
+
       - name: Upload binaries to release
-        uses: svenstaro/upload-release-action@v2
+        if: ${{ github.event_name == 'push' }}
+        uses: softprops/action-gh-release@v2
         with:
-          file: Quelea/dist/standalone/*
-          tag: CI-RELEASE
-          overwrite: true
+          files: Quelea/dist/standalone/*
+          tag_name: CI-RELEASE
           prerelease: true
           make_latest: false
-          file_glob: true
-          body: "**This is a CI Build, built from the latest copy of the source code automatically. It's not an official release and we don't recommend using this in production.**<br/>Quelea is also distributed as a Linux snap package. To install it, make sure snap is installed then run:<pre>sudo snap install --edge quelea</pre>"
+          body: "**This is a CI Build, built from the latest copy of the source code automatically. 
+                It's not an official release and we don't recommend using this in production.**<br/>
+                Quelea is also distributed as a Linux snap package. To install it, make 
+                sure snap is installed then run:
+                <pre>sudo snap install --edge quelea</pre>"
+
+      - name: Upload standalones as artifact of PR
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/upload-artifact@v4
+        with:
+          path: Quelea/dist/standalone/
