@@ -34,6 +34,7 @@ import org.quelea.windows.main.DisplayCanvas.Priority;
 import org.quelea.windows.main.widgets.Clock;
 import org.quelea.windows.main.widgets.TestImage;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -72,21 +73,20 @@ public class DisplayStage extends Stage {
         canvas = new DisplayCanvas(stageView, null, stageView ? Priority.HIGH : Priority.MID);
         canvas.setCursor(BLANK_CURSOR);
         scenePane.getChildren().add(canvas);
-        if (stageView) {
-            final Clock clock = new Clock();
-            ChangeListener<Number> cl = (ov, t, t1) -> {
-                double size = getWidth();
-                if (getHeight() < size) {
-                    size = getHeight();
-                }
-                clock.setFontSize(size / 24);
-            };
-            widthProperty().addListener(cl);
-            heightProperty().addListener(cl);
-            StackPane.setAlignment(clock, Pos.BOTTOM_RIGHT);
-            scenePane.getChildren().add(clock);
-            clock.toFront();
-        }
+        final Clock clock = new Clock();
+        ChangeListener<Number> cl = (ov, t, t1) -> {
+            double size = getWidth();
+            LOGGER.log(Level.INFO, Double.toString(size));
+            if (getHeight() < size) {
+                size = getHeight();
+            }
+            clock.setFontSize(size * 2);
+        };
+        widthProperty().addListener(cl);
+        heightProperty().addListener(cl);
+        StackPane.setAlignment(clock, Pos.BOTTOM_CENTER);
+        scenePane.getChildren().add(clock);
+        clock.toFront();
         testImage = new TestImage();
         testImage.getImageView().setPreserveRatio(true);
         testImage.getImageView().fitWidthProperty().bind(widthProperty());

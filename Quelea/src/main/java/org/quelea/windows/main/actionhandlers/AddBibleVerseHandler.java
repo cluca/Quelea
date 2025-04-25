@@ -100,7 +100,10 @@ public class AddBibleVerseHandler {
                     passageNumber = passageNumber + "-" + lastNumber;
                 }
             }
-            String summary = firstVerse.getChapter().getBook() + " " + passageNumber + "\n" + b.getBibleName();
+            String summary = firstVerse.getChapter().getBook() + " " + passageNumber +
+                    "\n" + b.getBibleName() +
+                    "\n" + firstVerse.getChapter().getBook() +
+                    "\n" + firstVerse.getChapter().getNum();
             replaceMap.put(passage, new BiblePassage(summary, newVerses.toArray(new BibleVerse[newVerses.size()]), theme, passage.getMulti()));
         }
         sl.getSelectionModel().clearSelection();

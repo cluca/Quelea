@@ -83,7 +83,12 @@ public class BiblePassage implements TextDisplayable, Serializable {
         fontSizeCache = new HashMap<>();
         this.summary = summary;
         this.multi = multi;
-        this.smallText = summary.split("\n");
+        String[] splitSummary = summary.split("\n");
+        if (splitSummary.length == 4) {
+            this.smallText = new String[]{ splitSummary[2] + " " + splitSummary[3] };
+        } else {
+            this.smallText = new String[]{splitSummary[0]};
+        }
         for (int i = 0; i < smallText.length; i++) {
             smallText[i] = Utils.removeTags(smallText[i]);
         }
@@ -120,22 +125,25 @@ public class BiblePassage implements TextDisplayable, Serializable {
         int lines = 0;
         int count = 0;
         boolean verseError = false;
+        int lastVerseNumber = 0;
         for (BibleVerse verse : verses) {
             if (verse == null) {
                 verseError = true;
             } else {
+                lastVerseNumber = verse.getNum();
                 if (QueleaProperties.get().getShowVerseNumbers()) {
                     line.append("<sup>");
                     if (multi) {
                         line.append(verse.getChapterNum()).append(":");
                     }
                     line.append(verse.getNum());
+                    line.append(".");
                     line.append("</sup>");
                 }
                 String verseText = verse.getText();
                 String[] verseWords = verseText.split(" ");
                 for (String verseWord : verseWords) {
-                    if (line.toString().replaceAll("\\<sup\\>[0-9]+\\<\\/sup\\>", "").length() + verseWord.length() > MAX_CHARS) {
+                    if (line.toString().replaceAll("\\<sup\\>[0-9]+\\.\\<\\/sup\\>", "").length() + verseWord.length() > MAX_CHARS) {
                         section.append(line);
                         lines++;
                         line.setLength(0);
@@ -173,7 +181,12 @@ public class BiblePassage implements TextDisplayable, Serializable {
                             section.append(line);
                             line.setLength(0);
                         }
-                        textSections.add(new TextSection("", new String[]{section.toString().trim()}, smallText, false));
+                        if (MAX_VERSES == 1) {
+                            String[] smallVerseText = new String[] {smallText[0] + ":" + lastVerseNumber};
+                            textSections.add(new TextSection("", new String[]{section.toString().trim()}, smallVerseText, false));
+                        } else {
+                            textSections.add(new TextSection("", new String[]{section.toString().trim()}, smallText, false));
+                        }
                         section = new StringBuilder();
                         count = 0;
                     }
@@ -188,7 +201,12 @@ public class BiblePassage implements TextDisplayable, Serializable {
         }
 
         if (!section.toString().isEmpty()) {
-            textSections.add(new TextSection("", new String[]{section.toString().trim()}, smallText, false));
+            if (MAX_VERSES == 1) {
+                String[] smallVerseText = new String[] {smallText[0] + " : " + lastVerseNumber};
+                textSections.add(new TextSection("", new String[]{section.toString().trim()}, smallVerseText, false));
+            } else {
+                textSections.add(new TextSection("", new String[]{section.toString().trim()}, smallText, false));
+            }
         }
 
         if (verseError) {

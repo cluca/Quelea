@@ -36,14 +36,14 @@ import org.quelea.services.utils.QueleaProperties;
 public class Clock extends Text {
 
     public Clock() {
-        setFontSize(50);
+        setFontSize(100);
         setFill(QueleaProperties.get().getStageLyricsColor());
         bindToTime();
         setOpacity(0.8);
     }
 
     public void setFontSize(double fontSize) {
-        setFont(Font.font("Noto Sans", FontWeight.BOLD, FontPosture.REGULAR, fontSize));
+        setFont(Font.font("Arial Black", FontWeight.BOLD, FontPosture.REGULAR, fontSize));
         setFill(QueleaProperties.get().getStageChordColor());
     }
 

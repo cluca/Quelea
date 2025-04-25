@@ -180,6 +180,7 @@ public class PreferencesDialog extends Stage {
         if (horizontal)
             setting = Setting.of(label, FXCollections.observableArrayList(
                     LabelGrabber.INSTANCE.getLabel("left"),
+                    LabelGrabber.INSTANCE.getLabel("centre"),
                     LabelGrabber.INSTANCE.getLabel("right")),
                     new SimpleObjectProperty<>(LabelGrabber.INSTANCE.getLabel(selectedValue.toLowerCase())));
         else

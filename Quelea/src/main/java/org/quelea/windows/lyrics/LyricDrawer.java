@@ -170,7 +170,7 @@ public class LyricDrawer extends WordDrawer {
                 theme.isTranslateItalic() ? FontPosture.ITALIC : FontPosture.REGULAR,
                 fontSize - QueleaProperties.get().getTranslationFontSizeOffset());
         double smallFontSize;
-        Font smallTextFont = Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 500);
+        Font smallTextFont = Font.font("Arial Black", FontWeight.BOLD, FontPosture.REGULAR, 500);
 
         if (curDisplayable instanceof BiblePassage) {
             smallFontSize = pickSmallFontSize(smallTextFont, smallText, getCanvas().getWidth() * 0.8,
@@ -179,7 +179,7 @@ public class LyricDrawer extends WordDrawer {
             smallFontSize = pickSmallFontSize(smallTextFont, smallText, getCanvas().getWidth() * 0.8,
                     (getCanvas().getHeight() * (QueleaProperties.get().getSmallSongTextSize())) - 5); //-5 for insets
         }
-        smallTextFont = Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, smallFontSize);
+        smallTextFont = Font.font("Arial Black", FontWeight.BOLD, FontPosture.REGULAR, smallFontSize);
 
         FXFontMetrics metrics = new FXFontMetrics(font);
         FXFontMetrics translateMetrics = new FXFontMetrics(translateFont);
@@ -195,21 +195,25 @@ public class LyricDrawer extends WordDrawer {
         if (smallshadow == null) {
             smallshadow = new DropShadow();
         }
-        smallshadow.setOffsetX(smallTextMetrics.getLineHeight() * shadow.getOffsetX() * 0.03);
-        smallshadow.setOffsetY(smallTextMetrics.getLineHeight() * shadow.getOffsetY() * 0.03);
-        smallshadow.setRadius(shadow.getRadius() * smallTextMetrics.getLineHeight() * 0.015);
+        smallshadow.setOffsetX(0.0f);
+        smallshadow.setOffsetY(0.0f);
+        smallshadow.setRadius(0.0f);
         smallTextGroup.setEffect(smallshadow);
 
         if (curDisplayable instanceof BiblePassage) {
             if (QueleaProperties.get().getSmallBibleTextPositionV().equalsIgnoreCase("top")) {
                 if (QueleaProperties.get().getSmallBibleTextPositionH().equalsIgnoreCase("left")) {
                     StackPane.setAlignment(smallTextGroup, Pos.TOP_LEFT);
+                } else if (QueleaProperties.get().getSmallBibleTextPositionH().equalsIgnoreCase("centre")) {
+                    StackPane.setAlignment(smallTextGroup, Pos.TOP_CENTER);
                 } else {
                     StackPane.setAlignment(smallTextGroup, Pos.TOP_RIGHT);
                 }
             } else {
                 if (QueleaProperties.get().getSmallBibleTextPositionH().equalsIgnoreCase("left")) {
                     StackPane.setAlignment(smallTextGroup, Pos.BOTTOM_LEFT);
+                } else if (QueleaProperties.get().getSmallBibleTextPositionH().equalsIgnoreCase("centre")) {
+                    StackPane.setAlignment(smallTextGroup, Pos.BOTTOM_CENTER);
                 } else {
                     StackPane.setAlignment(smallTextGroup, Pos.BOTTOM_RIGHT);
                 }
